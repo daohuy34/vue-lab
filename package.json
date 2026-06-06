@@ -1,8 +1,27 @@
 {
   "name": "vue-lab",
-  "version": "0.0.1",
-  "description": "Zero-config component explorer for Vue",
-  "bin": {
-    "vue-lab": "./bin/index.js"
+  "version": "0.2.0",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "clean": "pnpm -r run clean"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^9.0.0",
+    "@types/node": "^20.12.0",
+    "@typescript-eslint/eslint-plugin": "^8.60.1",
+    "@typescript-eslint/parser": "^8.60.1",
+    "@vue/tsconfig": "^0.9.1",
+    "eslint": "^10.4.1",
+    "jsdom": "^29.1.1",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

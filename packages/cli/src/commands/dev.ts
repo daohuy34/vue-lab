@@ -1,0 +1,48 @@
+import { bold, cyan, green, red, yellow } from 'kolorist';
+import { execa } from 'execa';
+import { Server } from '@vue-lab/server';
+import { Scanner } from '@vue-lab/scanner';
+import { DEFAULT_SERVER_PORT } from '@vue-lab/core';
+
+interface DevOptions {
+  port: number;
+  host: string;
+  open: boolean;
+  root: string;
+}
+
+export async function dev(options: DevOptions): Promise<void> {
+  const { port = DEFAULT_SERVER_PORT, host = 'localhost', open = true, root = process.cwd() } = options;
+
+  console.log(bold(cyan('\n🚀 Vue Lab\n')));
+
+  console.log(cyan('  Initializing scanner...'));
+  const scanner = new Scanner({ root });
+
+  console.log(cyan('  Scanning components...'));
+  const components = await scanner.scan();
+  console.log(green(`  ✔ Found ${components.length} components`));
+
+  console.log(cyan('\n  Starting server...'));
+  const server = new Server({
+    port,
+    host,
+    scanner,
+  });
+
+  await server.start();
+
+  const url = `http://${host}:${port}`;
+  console.log(green(`  ✔ Vue Lab running at ${bold(url)}\n`));
+
+  if (open) {
+    console.log(cyan('  Opening browser...'));
+    await execa('open', [url]);
+  }
+
+  process.on('SIGINT', async () => {
+    console.log(yellow('\n\n  Shutting down...'));
+    await server.stop();
+    process.exit(0);
+  });
+}

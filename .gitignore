@@ -1,0 +1,139 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.nuxt/
+.output/
+.build/
+coverage/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# Package manager
+.pnp
+.pnp.js
+
+# Lock files (chỉ bỏ comment nếu muốn ignore)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Testing
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# Docker
+.docker/
+
+# Local Docker files
+docker-compose.override.yml
+
+# Nuxt
+.nuxt/
+.output/
+
+# Vue
+dist/
+
+# Vite
+vite.config.ts.timestamp-*
+*.local
+
+# NestJS
+dist/
+uploads/
+storage/
+
+# Prisma
+prisma/dev.db
+prisma/dev.db-journal
+
+# MongoDB local dump
+dump/
+
+# Generated files
+*.tgz
+
+# Mac
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+
+# Windows
+Desktop.ini
+
+# ESLint cache
+.eslintcache
+
+# Stylelint cache
+.stylelintcache
+
+# Turbo
+.turbo/
+
+# Storybook
+storybook-static/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# Playwright
+playwright-report/
+test-results/
+
+# Cache
+.cache-loader/
+.parcel-cache/
+
+# PM2
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Runtime data
+*.dat
+
+# npm pack output
+*.tgz
+
+# Generated docs
+docs/
+
+# Local certificates
+certs/
+*.pem
+*.key

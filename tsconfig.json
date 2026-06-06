@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022"],
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@vue-lab/core": ["packages/core/src"],
+      "@vue-lab/cli": ["packages/cli/src"],
+      "@vue-lab/scanner": ["packages/scanner/src"],
+      "@vue-lab/runtime": ["packages/runtime/src"],
+      "@vue-lab/server": ["packages/server/src"],
+      "@vue-lab/ui": ["packages/ui/src"]
+    }
+  },
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/cli" },
+    { "path": "./packages/scanner" },
+    { "path": "./packages/runtime" },
+    { "path": "./packages/server" },
+    { "path": "./packages/ui" }
+  ],
+  "exclude": ["node_modules", "dist", "**/dist"]
+}
