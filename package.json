@@ -1,0 +1,8 @@
+{
+  "name": "vue-lab",
+  "version": "0.0.1",
+  "description": "Zero-config component explorer for Vue",
+  "bin": {
+    "vue-lab": "./bin/index.js"
+  }
+}
