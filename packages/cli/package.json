@@ -17,6 +17,7 @@
   "dependencies": {
     "@vue-lab/core": "workspace:*",
     "@vue-lab/scanner": "workspace:*",
+    "@vue-lab/snapshot": "workspace:*",
     "@vue-lab/server": "workspace:*",
     "@vue-lab/ui": "workspace:*",
     "cac": "^6.7.14",

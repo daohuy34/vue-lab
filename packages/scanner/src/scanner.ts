@@ -1,9 +1,10 @@
 import fg from 'fast-glob';
 import { parse } from '@vue/compiler-sfc';
 import { watch, FSWatcher } from 'chokidar';
-import { ComponentMeta, FileWatchEvent, WatchEvent, DEFAULT_SRC_DIR, DEFAULT_COMPONENTS_PATTERN } from '@vue-lab/core';
+import { ComponentMeta, FileWatchEvent, WatchEvent, DEFAULT_SRC_DIR, DEFAULT_COMPONENTS_PATTERN, PropDefinition, EmitDefinition, SlotDefinition } from '@vue-lab/core';
 import { basename, dirname, relative, join } from 'path';
 import { ComponentRegistry } from './registry.js';
+import { parseSFC } from './parser.js';
 
 export interface ScannerOptions {
   root: string;
@@ -18,7 +19,8 @@ export class Scanner {
   private pattern: string;
   private registry: ComponentRegistry;
   private watcher?: FSWatcher;
-  private onChange?: (event: FileWatchEvent) => void;
+  public onChange?: (event: FileWatchEvent) => void;
+  private usedByMap: Map<string, Set<string>> = new Map();
 
   constructor(options: ScannerOptions) {
     this.root = options.root;
@@ -42,7 +44,93 @@ export class Scanner {
     }
 
     this.registry.loadAll(components);
+    this.buildUsedByMap(components);
     return components;
+  }
+
+  async scanWithAnalysis(): Promise<ComponentMeta[]> {
+    const globPattern = join(this.root, this.srcDir, '**/*.vue');
+    const files = await fg(globPattern, { cwd: this.root, onlyFiles: true });
+
+    const components: ComponentMeta[] = [];
+
+    for (const file of files) {
+      const meta = await this.extractComponentMetaWithAnalysis(file);
+      if (meta) {
+        components.push(meta);
+      }
+    }
+
+    this.registry.loadAll(components);
+    this.buildUsedByMap(components);
+
+    for (const component of components) {
+      if (this.usedByMap.has(component.id)) {
+        component.usedBy = Array.from(this.usedByMap.get(component.id) || []);
+      }
+    }
+
+    return components;
+  }
+
+  private buildUsedByMap(components: ComponentMeta[]): void {
+    this.usedByMap.clear();
+    
+    for (const component of components) {
+      if (!this.usedByMap.has(component.id)) {
+        this.usedByMap.set(component.id, new Set());
+      }
+      
+      const deps = component.dependencies || [];
+      for (const depName of deps) {
+        const depComponent = components.find(c => c.name === depName);
+        if (depComponent) {
+          const usedBy = this.usedByMap.get(depComponent.id);
+          if (usedBy) {
+            usedBy.add(component.id);
+          }
+        }
+      }
+    }
+  }
+
+  getUsedBy(componentId: string): string[] {
+    return Array.from(this.usedByMap.get(componentId) || []);
+  }
+
+  private async extractComponentMetaWithAnalysis(filePath: string): Promise<ComponentMeta | null> {
+    try {
+      const fullPath = filePath.startsWith('/') 
+        ? filePath 
+        : join(this.root, this.srcDir, filePath);
+      
+      const { readFile } = await import('fs/promises');
+      const content = await readFile(fullPath, 'utf-8');
+      
+      const parsed = parseSFC(content, { filename: filePath });
+      parse(content);
+      
+      const fileName = basename(filePath, '.vue');
+      const relativePath = relative(this.root, fullPath);
+      const dir = dirname(relativePath);
+      
+      const namespace = this.extractNamespace(dir);
+      const id = this.generateId(namespace, fileName, dir);
+
+      return {
+        id,
+        name: fileName,
+        namespace,
+        path: filePath,
+        props: parsed.props,
+        emits: parsed.emits,
+        slots: parsed.slots,
+        dependencies: parsed.dependencies,
+      };
+    } catch (error) {
+      console.warn(`Failed to parse ${filePath}:`, error);
+      return null;
+    }
   }
 
   private async extractComponentMeta(filePath: string): Promise<ComponentMeta | null> {
@@ -144,13 +232,14 @@ export class Scanner {
         });
       }
     } else {
-      const meta = await this.extractComponentMeta(relativePath);
+      const meta = await this.extractComponentMetaWithAnalysis(relativePath);
       if (meta) {
         const existing = this.registry.getByPath(relativePath);
         if (existing) {
           this.registry.unregister(existing.id);
         }
         this.registry.register(meta);
+        this.buildUsedByMap(this.registry.getComponents());
         this.onChange?.({
           event,
           path: relativePath,

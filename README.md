@@ -11,8 +11,9 @@ Vue Lab automatically scans your Vue/Nuxt project and provides an interactive we
 - **Auto Discovery** — Automatically find all Vue components in your project
 - **Live Preview** — Preview components with real-time updates
 - **Props Editor** — Interactive props playground for testing
-- **Dependency Graph** — Visualize component relationships
+- **Dependency Detection** — Detect missing Pinia, Router, i18n, Nuxt composables
 - **SFC Analysis** — Extract props, emits, slots, and dependencies
+- **Explorer UI** — Professional 3-panel layout with tree view, search, and filters
 
 ## Quick Start
 
@@ -28,7 +29,7 @@ Open `http://localhost:5173` in your browser.
 
 ## Architecture
 
-Vue Lab is a monorepo with 6 packages:
+Vue Lab is a monorepo with 8 packages:
 
 ```
 vue-lab
@@ -37,6 +38,8 @@ vue-lab
 │   ├── core/       # Shared types and constants
 │   ├── scanner/    # Component discovery & SFC analysis
 │   ├── runtime/    # Component preview runtime
+│   ├── detector/   # Dependency detection (Pinia, Router, i18n, Nuxt)
+│   ├── context/    # Project context runtime (setup detection, injection)
 │   ├── server/     # Dev server + WebSocket
 │   └── ui/         # Web UI
 ```
@@ -75,6 +78,21 @@ Component preview runtime that:
 - Provides error boundary for missing dependencies
 - Tracks render status (ready/warning/failed)
 
+### @vue-lab/detector
+Dependency detection engine that:
+- Detects Pinia usage (`useStore`, `defineStore`, `createPinia`)
+- Detects Vue Router usage (`useRouter`, `useRoute`, `RouterLink`)
+- Detects vue-i18n usage (`useI18n`, `t()`, `createI18n`)
+- Detects Nuxt composables (`useAsyncData`, `useFetch`, `useCookie`)
+- Detects inject/provide patterns
+- Reports missing packages
+
+### @vue-lab/context
+Project context runtime that:
+- Detects project setup (Pinia, Router, I18n, Nuxt)
+- Manages runtime modes (isolated vs project)
+- Provides dependency injection for plugins, providers, stores
+
 ### @vue-lab/server
 Development server with:
 - Express + WebSocket for hot reload
@@ -83,10 +101,24 @@ Development server with:
 
 ### @vue-lab/ui
 Web UI built with Vue 3 featuring:
-- Component browser with search
-- Live preview panel
-- Props playground
-- Dependency visualization
+- **Explorer Panel** — Collapsible tree view by namespace
+- **Preview Panel** — Component preview with tabs (Props, Slots, Source)
+- **Inspector Panel** — Component metadata and status
+- **Search** — Debounced search with highlighting
+- **Filters** — Filter by status (ready/warning/failed)
+- **Intelligence Tab** — Used By analysis, Dependency Tree, Import Graph
+
+### @vue-lab/nuxt
+Nuxt-specific support featuring:
+- Automatic Nuxt project detection
+- Nuxt composables support (useNuxtApp, useAsyncData, useFetch)
+- Auto-import resolution for components, composables, and utils
+
+### @vue-lab/snapshot
+Snapshot system for visual testing:
+- Screenshot capture of components
+- Snapshot storage and comparison
+- Diff viewer with visual highlighting
 
 ## Roadmap
 
@@ -94,10 +126,14 @@ Web UI built with Vue 3 featuring:
 - [x] Phase 2: Component Discovery Engine
 - [x] Phase 3: Vue SFC Analysis
 - [x] Phase 4: Component Preview Runtime
-- [ ] Phase 5: Props Playground
-- [ ] Phase 6: Component Search
-- [ ] Phase 7: Hot Reload
-- [ ] Phase 8: Nuxt Support
+- [x] Phase 5: Props Playground
+- [x] Phase 6: Dependency Detection
+- [x] Phase 7: Project Context Runtime
+- [x] Phase 8: Explorer UI
+- [x] Phase 9: Component Intelligence
+- [x] Phase 10: Snapshot System
+- [x] Phase 11: Nuxt Support
+- [x] Phase 12: Release & Adoption
 
 ## License
 

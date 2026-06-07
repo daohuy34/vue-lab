@@ -4,7 +4,8 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import { Scanner } from '@vue-lab/scanner';
 import { Runtime } from '@vue-lab/runtime';
-import { ComponentMeta, WSMessage, ApiResponse, DEFAULT_SERVER_PORT } from '@vue-lab/core';
+import { ProjectSetupDetector } from '@vue-lab/context';
+import { ComponentMeta, WSMessage, ApiResponse, DEFAULT_SERVER_PORT, ComponentMetaFull } from '@vue-lab/core';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -22,13 +23,18 @@ export class Server {
   private scanner: Scanner;
   private runtime: Runtime;
   private viteServer: any = null;
+  private projectRoot: string;
+  private projectSetup: any = null;
+  private projectSetupDetector: ProjectSetupDetector;
 
   constructor(options: ServerOptions) {
     this.port = options.port || DEFAULT_SERVER_PORT;
     this.host = options.host || 'localhost';
     this.scanner = options.scanner;
+    this.projectRoot = process.cwd();
     this.app = express();
-    this.runtime = new Runtime({ root: process.cwd(), mode: 'isolated' });
+    this.runtime = new Runtime({ root: this.projectRoot, mode: 'isolated' });
+    this.projectSetupDetector = new ProjectSetupDetector();
     
     this.setupMiddleware();
     this.setupRoutes();
@@ -39,12 +45,24 @@ export class Server {
     this.app.use(express.json());
   }
 
+  private async detectProjectSetup() {
+    if (this.projectSetup) return this.projectSetup;
+    
+    this.projectSetup = await this.projectSetupDetector.detect({
+      root: this.projectRoot,
+      srcDir: 'src',
+      type: 'vue',
+    });
+    
+    return this.projectSetup;
+  }
+
   private setupRoutes(): void {
-    this.app.get('/api/components', (_req: Request, res: Response) => {
-      const components = this.scanner.getComponents();
-      const response: ApiResponse<ComponentMeta[]> = {
+    this.app.get('/api/components', async (_req: Request, res: Response) => {
+      const components = await this.scanner.scanWithAnalysis();
+      const response: ApiResponse<ComponentMetaFull[]> = {
         success: true,
-        data: components,
+        data: components as ComponentMetaFull[],
       };
       res.json(response);
     });
@@ -72,6 +90,32 @@ export class Server {
       res.json(response);
     });
 
+    this.app.get('/api/components/:id/source', async (req: Request, res: Response) => {
+      const { id } = req.params;
+      const component = this.scanner.getComponent(id);
+      
+      if (!component) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: `Component ${id} not found`,
+          },
+        };
+        res.status(404).json(response);
+        return;
+      }
+
+      try {
+        const { readFile } = await import('fs/promises');
+        const fullPath = join(this.projectRoot, 'src', component.path);
+        const source = await readFile(fullPath, 'utf-8');
+        res.json({ success: true, data: { source, path: component.path } });
+      } catch {
+        res.status(500).json({ success: false, error: { code: 'READ_ERROR', message: 'Failed to read source file' } });
+      }
+    });
+
     this.app.post('/api/render/:id', async (req: Request, res: Response) => {
       const { id } = req.params;
       const props = req.body?.props || {};
@@ -95,6 +139,64 @@ export class Server {
         data: result,
       };
       res.json(response);
+    });
+
+    this.app.get('/api/render/:id/component', async (req: Request, res: Response) => {
+      const { id } = req.params;
+      const component = this.scanner.getComponent(id);
+      
+      if (!component) {
+        res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: `Component ${id} not found` } });
+        return;
+      }
+
+      const result = await this.runtime.loadComponentForRender(id);
+      if (!result) {
+        res.status(404).json({ success: false, error: { code: 'LOAD_ERROR', message: 'Failed to load component' } });
+        return;
+      }
+
+      res.json({ success: true, data: { component: id, props: {} } });
+    });
+
+    this.app.get('/api/search', (req: Request, res: Response) => {
+      const query = req.query.q as string;
+      if (!query) {
+        res.json({ success: true, data: [] });
+        return;
+      }
+      const results = this.scanner.search(query);
+      res.json({ success: true, data: results });
+    });
+
+    this.app.get('/api/namespaces', (_req: Request, res: Response) => {
+      const namespaces = this.scanner.getNamespaces();
+      const components = this.scanner.getComponents();
+      const namespaceData = namespaces.map(ns => ({
+        name: ns,
+        components: components.filter(c => c.namespace === ns),
+      }));
+      res.json({ success: true, data: namespaceData });
+    });
+
+    this.app.get('/api/project-context', async (_req: Request, res: Response) => {
+      const setup = await this.detectProjectSetup();
+      res.json({
+        success: true,
+        data: {
+          mode: 'isolated',
+          setup: {
+            hasPinia: setup.pinia.detected,
+            hasRouter: setup.router.detected,
+            hasI18n: setup.i18n.detected,
+            hasNuxt: setup.nuxt?.detected || false,
+            pinia: setup.pinia,
+            router: setup.router,
+            i18n: setup.i18n,
+            nuxt: setup.nuxt,
+          },
+        },
+      });
     });
   }
 
@@ -130,6 +232,7 @@ export class Server {
 
   async start(): Promise<void> {
     await this.setupVite();
+    await this.detectProjectSetup();
     
     this.setupWebSocket();
 

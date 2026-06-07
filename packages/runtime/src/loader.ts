@@ -1,5 +1,5 @@
 import { ComponentId } from '@vue-lab/core';
-import { join } from 'path';
+import { join, dirname, relative, isAbsolute } from 'path';
 import { readFile } from 'fs/promises';
 
 export interface LoaderOptions {
@@ -22,7 +22,7 @@ export class ComponentLoader {
 
     try {
       const componentPath = this.resolveComponentPath(componentId);
-      const module = await import(componentPath);
+      const module = await import(/* @vite-ignore */ componentPath);
       
       this.cache.set(componentId, module.default || module);
       return this.cache.get(componentId);
@@ -48,19 +48,25 @@ export class ComponentLoader {
     }
   }
 
-  private resolveComponentPath(componentId: ComponentId): string {
-    const [namespace, name] = componentId.split('/');
-    
-    if (namespace === 'Shared') {
-      return join(this.root, 'src', `${name}.vue`);
+  resolveComponentPath(componentId: ComponentId): string {
+    if (componentId.includes('/')) {
+      const parts = componentId.split('/');
+      if (parts.length === 2) {
+        const [namespace, name] = parts;
+        const dirName = namespace.charAt(0).toLowerCase() + namespace.slice(1);
+        return join(this.root, 'src', dirName, `${name}.vue`);
+      }
+      return join(this.root, 'src', componentId.replace(/\//g, '/') + '.vue');
     }
-    
-    const dirName = namespace.charAt(0).toLowerCase() + namespace.slice(1);
-    return join(this.root, 'src', dirName, `${name}.vue`);
+    return join(this.root, 'src', `${componentId}.vue`);
   }
 
-  private resolveComponentFilePath(componentId: ComponentId): string {
+  resolveComponentFilePath(componentId: ComponentId): string {
     return this.resolveComponentPath(componentId);
+  }
+
+  getSourceDir(): string {
+    return this.root;
   }
 
   clearCache(): void {

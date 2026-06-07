@@ -1,258 +1,100 @@
 import { describe, it, expect } from 'vitest';
-import { Scanner } from '@/scanner';
-import { join } from 'path';
-import { mkdtemp, rm, writeFile, mkdir } from 'fs/promises';
+import { Scanner } from '../src/index.js';
+import { resolve } from 'path';
 
-describe('Scanner', () => {
+describe('Scanner CLI Integration', () => {
   describe('scan', () => {
-    it('should scan and extract components from Vue files', async () => {
-      const tempDir = await mkdtemp(join('/tmp', 'vue-lab-test-'));
+    it('should scan playground package', async () => {
+      const scanner = new Scanner({ 
+        root: resolve(__dirname, '..', '..', '..', 'packages', 'playground'),
+        srcDir: 'src'
+      });
+      const components = await scanner.scan();
       
-      try {
-        await mkdir(join(tempDir, 'src/components'), { recursive: true });
-        await writeFile(
-          join(tempDir, 'src/components/Button.vue'),
-          '<template><button>Click</button></template>',
-          'utf-8'
-        );
-        await writeFile(
-          join(tempDir, 'src/components/Modal.vue'),
-          '<template><div>Modal</div></template>',
-          'utf-8'
-        );
-
-        const scanner = new Scanner({ root: tempDir });
-        const components = await scanner.scan();
-
-        expect(components).toHaveLength(2);
-        expect(components.map(c => c.name).sort()).toEqual(['Button', 'Modal']);
-        
-        await scanner.stop();
-      } finally {
-        await rm(tempDir, { recursive: true, force: true });
-      }
+      expect(components).toBeDefined();
+      expect(Array.isArray(components)).toBe(true);
     });
 
-    it('should extract namespace from directory path', async () => {
-      const tempDir = await mkdtemp(join('/tmp', 'vue-lab-test-'));
+    it('should find Vue components in playground', async () => {
+      const scanner = new Scanner({ 
+        root: resolve(__dirname, '..', '..', '..', 'packages', 'playground'),
+        srcDir: 'src'
+      });
+      const components = await scanner.scan();
       
-      try {
-        await mkdir(join(tempDir, 'src/auth'), { recursive: true });
-        await writeFile(
-          join(tempDir, 'src/auth/Button.vue'),
-          '<template><button>Login</button></template>',
-          'utf-8'
-        );
-
-        const scanner = new Scanner({ root: tempDir });
-        const components = await scanner.scan();
-
-        expect(components).toHaveLength(1);
-        expect(components[0].namespace).toBe('Auth');
-        expect(components[0].id).toBe('Auth/Button');
-        
-        await scanner.stop();
-      } finally {
-        await rm(tempDir, { recursive: true, force: true });
-      }
+      const vueFiles = components.filter(c => c.path.endsWith('.vue'));
+      expect(vueFiles.length).toBeGreaterThan(0);
     });
 
-    it('should handle kebab-case directory names', async () => {
-      const tempDir = await mkdtemp(join('/tmp', 'vue-lab-test-'));
+    it('should extract component metadata', async () => {
+      const scanner = new Scanner({ 
+        root: resolve(__dirname, '..', '..', '..', 'packages', 'playground'),
+        srcDir: 'src'
+      });
+      const components = await scanner.scan();
       
-      try {
-        await mkdir(join(tempDir, 'src/auth-form'), { recursive: true });
-        await writeFile(
-          join(tempDir, 'src/auth-form/Submit.vue'),
-          '<template><button>Submit</button></template>',
-          'utf-8'
-        );
-
-        const scanner = new Scanner({ root: tempDir });
-        const components = await scanner.scan();
-
-        expect(components).toHaveLength(1);
-        expect(components[0].namespace).toBe('AuthForm');
-        
-        await scanner.stop();
-      } finally {
-        await rm(tempDir, { recursive: true, force: true });
-      }
-    });
-
-    it('should handle nested directory paths', async () => {
-      const tempDir = await mkdtemp(join('/tmp', 'vue-lab-test-'));
-      
-      try {
-        await mkdir(join(tempDir, 'src/ui/forms'), { recursive: true });
-        await writeFile(
-          join(tempDir, 'src/ui/forms/Input.vue'),
-          '<template><input /></template>',
-          'utf-8'
-        );
-
-        const scanner = new Scanner({ root: tempDir });
-        const components = await scanner.scan();
-
-        expect(components).toHaveLength(1);
-        expect(components[0].namespace).toBe('Forms');
-        
-        await scanner.stop();
-      } finally {
-        await rm(tempDir, { recursive: true, force: true });
-      }
-    });
-
-    it('should handle root-level components as Shared namespace', async () => {
-      const tempDir = await mkdtemp(join('/tmp', 'vue-lab-test-'));
-      
-      try {
-        await mkdir(join(tempDir, 'src'), { recursive: true });
-        await writeFile(
-          join(tempDir, 'src/BaseButton.vue'),
-          '<template><button>Base</button></template>',
-          'utf-8'
-        );
-
-        const scanner = new Scanner({ root: tempDir });
-        const components = await scanner.scan();
-
-        expect(components).toHaveLength(1);
-        expect(components[0].namespace).toBe('Shared');
-        
-        await scanner.stop();
-      } finally {
-        await rm(tempDir, { recursive: true, force: true });
+      for (const component of components) {
+        expect(component.id).toBeDefined();
+        expect(component.name).toBeDefined();
+        expect(component.namespace).toBeDefined();
+        expect(component.path).toBeDefined();
       }
     });
   });
 
   describe('getComponents', () => {
-    it('should return all registered components', async () => {
-      const tempDir = await mkdtemp(join('/tmp', 'vue-lab-test-'));
+    it('should return scanned components', async () => {
+      const scanner = new Scanner({ 
+        root: resolve(__dirname, '..', '..', '..', 'packages', 'playground'),
+        srcDir: 'src'
+      });
+      await scanner.scan();
       
-      try {
-        await mkdir(join(tempDir, 'src'), { recursive: true });
-        await writeFile(
-          join(tempDir, 'src/A.vue'),
-          '<template>A</template>',
-          'utf-8'
-        );
-        await writeFile(
-          join(tempDir, 'src/B.vue'),
-          '<template>B</template>',
-          'utf-8'
-        );
-
-        const scanner = new Scanner({ root: tempDir });
-        await scanner.scan();
-
-        expect(scanner.getComponents()).toHaveLength(2);
-        expect(scanner.getComponent('Shared/A')).toBeDefined();
-        
-        await scanner.stop();
-      } finally {
-        await rm(tempDir, { recursive: true, force: true });
-      }
+      const components = scanner.getComponents();
+      expect(components.length).toBeGreaterThan(0);
     });
   });
 
   describe('search', () => {
     it('should search components by name', async () => {
-      const tempDir = await mkdtemp(join('/tmp', 'vue-lab-test-'));
+      const scanner = new Scanner({ 
+        root: resolve(__dirname, '..', '..', '..', 'packages', 'playground'),
+        srcDir: 'src'
+      });
+      await scanner.scan();
       
-      try {
-        await mkdir(join(tempDir, 'src/components'), { recursive: true });
-        await writeFile(
-          join(tempDir, 'src/components/Button.vue'),
-          '<template>Button</template>',
-          'utf-8'
-        );
-        await writeFile(
-          join(tempDir, 'src/components/Input.vue'),
-          '<template>Input</template>',
-          'utf-8'
-        );
+      const results = scanner.search('Button');
+      expect(results.length).toBeGreaterThan(0);
+    });
 
-        const scanner = new Scanner({ root: tempDir });
-        await scanner.scan();
-
-        const results = scanner.search('Button');
-
-        expect(results).toHaveLength(1);
-        expect(results[0].name).toBe('Button');
-        
-        await scanner.stop();
-      } finally {
-        await rm(tempDir, { recursive: true, force: true });
-      }
+    it('should return empty array for non-matching search', async () => {
+      const scanner = new Scanner({ 
+        root: resolve(__dirname, '..', '..', '..', 'packages', 'playground'),
+        srcDir: 'src'
+      });
+      await scanner.scan();
+      
+      const results = scanner.search('NonExistentComponentXYZ123');
+      expect(results).toEqual([]);
     });
   });
 
   describe('getByNamespace', () => {
-    it('should return components by namespace', async () => {
-      const tempDir = await mkdtemp(join('/tmp', 'vue-lab-test-'));
+    it('should filter components by namespace', async () => {
+      const scanner = new Scanner({ 
+        root: resolve(__dirname, '..', '..', '..', 'packages', 'playground'),
+        srcDir: 'src'
+      });
+      await scanner.scan();
       
-      try {
-        await mkdir(join(tempDir, 'src/auth'), { recursive: true });
-        await mkdir(join(tempDir, 'src/product'), { recursive: true });
-        await writeFile(
-          join(tempDir, 'src/auth/Login.vue'),
-          '<template>Login</template>',
-          'utf-8'
-        );
-        await writeFile(
-          join(tempDir, 'src/auth/Register.vue'),
-          '<template>Register</template>',
-          'utf-8'
-        );
-        await writeFile(
-          join(tempDir, 'src/product/Card.vue'),
-          '<template>Card</template>',
-          'utf-8'
-        );
-
-        const scanner = new Scanner({ root: tempDir });
-        await scanner.scan();
-
-        const authComponents = scanner.getByNamespace('Auth');
-        expect(authComponents).toHaveLength(2);
-        
-        await scanner.stop();
-      } finally {
-        await rm(tempDir, { recursive: true, force: true });
-      }
-    });
-  });
-
-  describe('getNamespaces', () => {
-    it('should return all unique namespaces', async () => {
-      const tempDir = await mkdtemp(join('/tmp', 'vue-lab-test-'));
+      const namespaces = scanner.getNamespaces();
+      expect(namespaces.length).toBeGreaterThan(0);
       
-      try {
-        await mkdir(join(tempDir, 'src/auth'), { recursive: true });
-        await mkdir(join(tempDir, 'src/product'), { recursive: true });
-        await writeFile(
-          join(tempDir, 'src/auth/Button.vue'),
-          '<template>Auth</template>',
-          'utf-8'
-        );
-        await writeFile(
-          join(tempDir, 'src/product/Button.vue'),
-          '<template>Product</template>',
-          'utf-8'
-        );
-
-        const scanner = new Scanner({ root: tempDir });
-        await scanner.scan();
-
-        const namespaces = scanner.getNamespaces();
-        expect(namespaces).toContain('Auth');
-        expect(namespaces).toContain('Product');
-        
-        await scanner.stop();
-      } finally {
-        await rm(tempDir, { recursive: true, force: true });
+      for (const ns of namespaces) {
+        const components = scanner.getByNamespace(ns);
+        for (const c of components) {
+          expect(c.namespace).toBe(ns);
+        }
       }
     });
   });

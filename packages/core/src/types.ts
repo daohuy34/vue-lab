@@ -23,6 +23,24 @@ export interface ComponentMeta {
   namespace: Namespace;
   path: ComponentPath;
   tags?: string[];
+  props?: PropDefinition[];
+  emits?: EmitDefinition[];
+  slots?: SlotDefinition[];
+  dependencies?: string[];
+  usedBy?: ComponentId[];
+  depth?: number;
+}
+
+/**
+ * Extended component metadata with analysis data
+ */
+export interface ComponentMetaFull extends ComponentMeta {
+  props: PropDefinition[];
+  emits: EmitDefinition[];
+  slots: SlotDefinition[];
+  dependencies: string[];
+  usedBy?: ComponentId[];
+  depth?: number;
 }
 
 /**

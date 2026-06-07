@@ -137,3 +137,15 @@ docs/
 certs/
 *.pem
 *.key
+
+packages/playground/
+
+# Vue Lab local data
+.vue-lab/
+
+# Vitest results
+packages/*/node_modules/.vite/vitest/results.json
+
+# TypeScript build info
+packages/*/tsconfig.build.tsbuildinfo
+examples/

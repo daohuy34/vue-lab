@@ -8,7 +8,9 @@
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
     "lint": "pnpm -r run lint",
-    "clean": "pnpm -r run clean"
+    "typecheck": "pnpm -r run typecheck",
+    "clean": "pnpm -r run clean",
+    "snapshot": "pnpm -r run snapshot"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^9.0.0",
@@ -23,5 +25,9 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

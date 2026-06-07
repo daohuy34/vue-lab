@@ -47,6 +47,9 @@ importers:
       '@vue-lab/server':
         specifier: workspace:*
         version: link:../server
+      '@vue-lab/snapshot':
+        specifier: workspace:*
+        version: link:../snapshot
       '@vue-lab/ui':
         specifier: workspace:*
         version: link:../ui
@@ -70,12 +73,93 @@ importers:
         specifier: ^1.4.0
         version: 1.6.1(@types/node@20.19.42)(jsdom@29.1.1)
 
+  packages/context:
+    dependencies:
+      '@vue-lab/core':
+        specifier: workspace:*
+        version: link:../core
+      '@vue-lab/detector':
+        specifier: workspace:*
+        version: link:../detector
+      '@vue-lab/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@vue-lab/scanner':
+        specifier: workspace:*
+        version: link:../scanner
+      fast-glob:
+        specifier: ^3.3.2
+        version: 3.3.3
+    devDependencies:
+      '@types/node':
+        specifier: ^20.12.0
+        version: 20.19.42
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8.60.1
+        version: 8.60.1(@typescript-eslint/parser@8.60.1(eslint@10.4.1)(typescript@5.9.3))(eslint@10.4.1)(typescript@5.9.3)
+      '@typescript-eslint/parser':
+        specifier: ^8.60.1
+        version: 8.60.1(eslint@10.4.1)(typescript@5.9.3)
+      eslint:
+        specifier: ^10.4.1
+        version: 10.4.1
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.4.0
+        version: 1.6.1(@types/node@20.19.42)(jsdom@29.1.1)
+
   packages/core:
     dependencies:
       type-fest:
         specifier: ^4.15.0
         version: 4.41.0
     devDependencies:
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.4.0
+        version: 1.6.1(@types/node@20.19.42)(jsdom@29.1.1)
+
+  packages/detector:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.12.0
+        version: 20.19.42
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.4.0
+        version: 1.6.1(@types/node@20.19.42)(jsdom@29.1.1)
+
+  packages/nuxt:
+    dependencies:
+      '@vue-lab/core':
+        specifier: workspace:*
+        version: link:../core
+      '@vue-lab/detector':
+        specifier: workspace:*
+        version: link:../detector
+    devDependencies:
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.4.0
+        version: 1.6.1(@types/node@20.19.42)(jsdom@29.1.1)
+
+  packages/playground:
+    dependencies:
+      '@vue-lab/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@types/node':
+        specifier: ^20.12.0
+        version: 20.19.42
       typescript:
         specifier: ^5.4.0
         version: 5.9.3
@@ -129,6 +213,9 @@ importers:
 
   packages/server:
     dependencies:
+      '@vue-lab/context':
+        specifier: workspace:*
+        version: link:../context
       '@vue-lab/core':
         specifier: workspace:*
         version: link:../core
@@ -163,6 +250,28 @@ importers:
       '@types/ws':
         specifier: ^8.5.10
         version: 8.18.1
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.4.0
+        version: 1.6.1(@types/node@20.19.42)(jsdom@29.1.1)
+
+  packages/snapshot:
+    dependencies:
+      '@vue-lab/core':
+        specifier: workspace:*
+        version: link:../core
+      '@vue-lab/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@vue-lab/scanner':
+        specifier: workspace:*
+        version: link:../scanner
+      playwright:
+        specifier: ^1.42.0
+        version: 1.60.0
+    devDependencies:
       typescript:
         specifier: ^5.4.0
         version: 5.9.3
@@ -1567,6 +1676,11 @@ packages:
     resolution: {integrity: sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q==}
     engines: {node: '>= 0.6'}
 
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -2102,6 +2216,16 @@ packages:
 
   pkg-types@2.3.1:
     resolution: {integrity: sha512-y+ichcgc2LrADuhLNAx8DFjVfgz91pRxfZdI3UDhxHvcVEZsenLO+7XaU5vOp0u/7V/wZ+plyuQxtrDlZJ+yeg==}
+
+  playwright-core@1.60.0:
+    resolution: {integrity: sha512-9bW6zvX/m0lEbgTKJ6YppOKx8H3VOPBMOCFh2irXFOT4BbHgrx5hPjwJYLT40Lu+4qtD36qKc/Hn56StUW57IA==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.60.0:
+    resolution: {integrity: sha512-hheHdokM8cdqCb0lcE3s+zT4t4W+vvjpGxsZlDnikarzx8tSzMebh3UiFtgqwFwnTnjYQcsyMF8ei2mCO/tpeA==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   pluralize@8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
@@ -3985,6 +4109,9 @@ snapshots:
 
   fresh@0.5.2: {}
 
+  fsevents@2.3.2:
+    optional: true
+
   fsevents@2.3.3:
     optional: true
 
@@ -4671,6 +4798,14 @@ snapshots:
       confbox: 0.2.4
       exsolve: 1.0.8
       pathe: 2.0.3
+
+  playwright-core@1.60.0: {}
+
+  playwright@1.60.0:
+    dependencies:
+      playwright-core: 1.60.0
+    optionalDependencies:
+      fsevents: 2.3.2
 
   pluralize@8.0.0: {}
 
