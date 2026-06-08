@@ -1,4 +1,4 @@
-import { bold, cyan, green, red, yellow } from 'kolorist';
+import { bold, cyan, green, yellow } from 'kolorist';
 import { execa } from 'execa';
 import { Server } from '@vue-lab/server';
 import { Scanner } from '@vue-lab/scanner';

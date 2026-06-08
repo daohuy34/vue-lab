@@ -1,4 +1,4 @@
-import { ComponentId, RenderResult, RenderStatus } from '@vue-lab/core';
+import { ComponentId, RenderResult } from '@vue-lab/core';
 import { ComponentLoader } from './loader.js';
 import { ErrorBoundary } from './error-boundary.js';
 
@@ -33,7 +33,7 @@ export class Runtime {
     this.viteServer = server;
   }
 
-  async render(componentId: ComponentId, props: Record<string, unknown> = {}): Promise<RenderResult> {
+  async render(componentId: ComponentId, _props: Record<string, unknown> = {}): Promise<RenderResult> {
     this.state = 'loading';
     this.currentComponent = componentId;
     this.lastError = null;
@@ -113,7 +113,7 @@ export class Runtime {
     }
   }
 
-  getRenderContext(componentId: ComponentId): Record<string, unknown> {
+  getRenderContext(_componentId: ComponentId): Record<string, unknown> {
     const context: Record<string, unknown> = {
       mode: this.mode,
       root: this.root,

@@ -201,7 +201,7 @@ function extractEmits(scriptContent: string, scriptSetupContent: string): EmitDe
     const arrayContent = arrayMatch[0].match(/\[[\s\S]*?\]/);
     if (arrayContent) {
       const emitNames = arrayContent[0]
-        .replace(/[\[\]]/g, '')
+        .replace(/[[\]]/g, '')
         .split(',')
         .map(e => e.trim().replace(/['"`]/g, ''))
         .filter(Boolean);
@@ -218,7 +218,7 @@ function extractEmits(scriptContent: string, scriptSetupContent: string): EmitDe
     const arrayContent = objectArrayMatch[0].match(/\[[\s\S]*?\]/);
     if (arrayContent) {
       const emitNames = arrayContent[0]
-        .replace(/[\[\]]/g, '')
+        .replace(/[[\]]/g, '')
         .split(',')
         .map(e => {
           const m = e.trim().match(/['"](\w+)['"]/);

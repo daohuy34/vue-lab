@@ -1,5 +1,5 @@
 import type { RuntimeContext, InjectionResult } from './types.js';
-import type { PluginInjector, PluginDefinition, ProviderDefinition, StoreDefinition } from './injector-types.js';
+import type { PluginInjector, PluginDefinition, ProviderDefinition } from './injector-types.js';
 
 export class VueInjector implements PluginInjector {
   injectPlugin(context: RuntimeContext, name: string, plugin: unknown): InjectionResult {

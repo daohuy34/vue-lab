@@ -1,4 +1,4 @@
-import { RenderResult, RenderStatus } from '@vue-lab/core';
+import type { RenderResult } from '@vue-lab/core';
 
 interface ErrorPattern {
   pattern: RegExp;

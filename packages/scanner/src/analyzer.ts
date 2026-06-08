@@ -1,7 +1,7 @@
 import { readFile } from 'fs/promises';
-import { join, relative } from 'path';
+import { join } from 'path';
 import { ComponentAnalysis, ComponentId, ComponentMeta } from '@vue-lab/core';
-import { parseSFC, ParsedSFC } from './parser.js';
+import { parseSFC } from './parser.js';
 import { Scanner } from './scanner.js';
 import { ComponentRegistry } from './registry.js';
 

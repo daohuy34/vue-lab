@@ -1,7 +1,7 @@
 import fg from 'fast-glob';
 import { parse } from '@vue/compiler-sfc';
 import { watch, FSWatcher } from 'chokidar';
-import { ComponentMeta, FileWatchEvent, WatchEvent, DEFAULT_SRC_DIR, DEFAULT_COMPONENTS_PATTERN, PropDefinition, EmitDefinition, SlotDefinition } from '@vue-lab/core';
+import { ComponentMeta, FileWatchEvent, WatchEvent, DEFAULT_SRC_DIR, DEFAULT_COMPONENTS_PATTERN } from '@vue-lab/core';
 import { basename, dirname, relative, join } from 'path';
 import { ComponentRegistry } from './registry.js';
 import { parseSFC } from './parser.js';
@@ -195,7 +195,7 @@ export class Scanner {
     if (dirPath === '.' || dirPath === '') {
       return name;
     }
-    const dirName = dirname(dirPath).replace(/[\/\\]/g, '-');
+    const dirName = dirname(dirPath).replace(/[/\\]/g, '-');
     if (dirName === '.') {
       return `${namespace}/${name}`;
     }

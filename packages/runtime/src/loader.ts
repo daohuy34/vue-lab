@@ -1,5 +1,5 @@
 import { ComponentId } from '@vue-lab/core';
-import { join, dirname, relative, isAbsolute } from 'path';
+import { join } from 'path';
 import { readFile } from 'fs/promises';
 
 export interface LoaderOptions {
