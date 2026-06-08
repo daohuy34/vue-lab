@@ -5,14 +5,16 @@ import { Scanner } from '@vue-lab/scanner';
 import { DEFAULT_SERVER_PORT } from '@vue-lab/core';
 
 interface DevOptions {
-  port: number;
-  host: string;
-  open: boolean;
-  root: string;
+  port: string;
+  host?: string;
+  open: boolean | string;
+  root?: string;
 }
 
 export async function dev(options: DevOptions): Promise<void> {
   const { port = DEFAULT_SERVER_PORT, host = 'localhost', open = true, root = process.cwd() } = options;
+  const portNum = typeof port === 'string' ? parseInt(port) : port;
+  const shouldOpen = open === true || open === 'true' || open === undefined;
 
   console.log(bold(cyan('\n🚀 Vue Lab\n')));
 
@@ -25,17 +27,17 @@ export async function dev(options: DevOptions): Promise<void> {
 
   console.log(cyan('\n  Starting server...'));
   const server = new Server({
-    port,
+    port: portNum,
     host,
     scanner,
   });
 
   await server.start();
 
-  const url = `http://${host}:${port}`;
+  const url = `http://${host}:${portNum}`;
   console.log(green(`  ✔ Vue Lab running at ${bold(url)}\n`));
 
-  if (open) {
+  if (shouldOpen) {
     console.log(cyan('  Opening browser...'));
     await execa('open', [url]);
   }

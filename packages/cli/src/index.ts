@@ -1,60 +1,50 @@
-import program from 'commander';
+import cac from 'cac';
 import { dev } from './commands/dev.js';
 import { snapshot, snapshotWatch } from './commands/snapshot.js';
 
-program
-  .name('vue-lab')
-  .description('Zero-config Component Explorer for Vue & Nuxt')
-  .version('0.2.0');
+const cli = cac('vue-lab');
 
-program
-  .command('dev')
-  .description('Start Vue Lab development server')
-  .option('-p, --port <port>', 'Port for dev server', '5678')
-  .option('-o, --open', 'Open browser on start', true)
-  .action(dev);
+cli.version('0.2.0');
 
-program
-  .command('snapshot')
-  .description('Generate component snapshots')
-  .option('-o, --output <dir>', 'Output directory', '.vue-lab/snapshots')
-  .option('-f, --format <format>', 'Image format (png, webp)', 'png')
-  .option('-w, --width <width>', 'Viewport width', '800')
-  .option('-h, --height <height>', 'Viewport height', '600')
+cli
+  .command('dev', 'Start Vue Lab development server')
+  .option('-p, --port <port>', 'Port for dev server', { default: '5678' })
+  .option('-o, --open', 'Open browser on start', { default: true })
+  .action((options) => dev(options));
+
+cli
+  .command('snapshot', 'Generate component snapshots')
+  .option('-o, --output <dir>', 'Output directory', { default: '.vue-lab/snapshots' })
+  .option('-f, --format <format>', 'Image format (png, webp)', { default: 'png' })
+  .option('-w, --width <width>', 'Viewport width', { default: '800' })
+  .option('-h, --height <height>', 'Viewport height', { default: '600' })
   .option('--only <components...>', 'Only snapshot specific components')
   .option('-c, --compare', 'Compare with previous snapshots')
   .action(async (options) => {
     await snapshot({
-      output: options.output,
+      output: options.output as string,
       format: options.format as 'png' | 'webp',
-      width: parseInt(options.width),
-      height: parseInt(options.height),
-      only: options.only,
-      compare: options.compare,
+      width: parseInt(options.width as string),
+      height: parseInt(options.height as string),
+      only: options.only as string[] | undefined,
+      compare: options.compare as boolean | undefined,
     });
   });
 
-program
-  .command('snapshot:watch')
-  .description('Watch and generate snapshots on changes')
-  .option('-o, --output <dir>', 'Output directory', '.vue-lab/snapshots')
-  .option('-f, --format <format>', 'Image format (png, webp)', 'png')
-  .option('-w, --width <width>', 'Viewport width', '800')
-  .option('-h, --height <height>', 'Viewport height', '600')
+cli
+  .command('snapshot:watch', 'Watch and generate snapshots on changes')
+  .option('-o, --output <dir>', 'Output directory', { default: '.vue-lab/snapshots' })
+  .option('-f, --format <format>', 'Image format (png, webp)', { default: 'png' })
+  .option('-w, --width <width>', 'Viewport width', { default: '800' })
+  .option('-h, --height <height>', 'Viewport height', { default: '600' })
   .action(async (options) => {
     await snapshotWatch({
-      output: options.output,
+      output: options.output as string,
       format: options.format as 'png' | 'webp',
-      width: parseInt(options.width),
-      height: parseInt(options.height),
+      width: parseInt(options.width as string),
+      height: parseInt(options.height as string),
     });
   });
 
-program
-  .command('version')
-  .description('Show version information')
-  .action(() => {
-    console.log('vue-lab v0.2.0');
-  });
-
-program.parse(process.argv);
+cli.help();
+cli.parse();
