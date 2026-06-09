@@ -1,8 +1,14 @@
 {
-  "name": "vue-lab",
-  "version": "0.2.0",
-  "private": true,
+  "name": "vue-lab-ci",
+  "version": "1.1.0",
   "packageManager": "pnpm@9.0.0",
+  "bin": {
+    "vue-doctor": "dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daohuy34/vue-lab.git"
+  },
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
     "build": "pnpm -r run build",
